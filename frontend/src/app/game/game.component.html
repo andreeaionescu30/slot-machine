@@ -1,0 +1,124 @@
+<div>
+    <h2>Game component</h2>
+
+    <button *ngIf="!startNewGameDivShown" (click)="startNewGameDivShown = true">Start a new game</button>
+    <div *ngIf="startNewGameDivShown">
+        <button (click)="startGame()">Ready!</button>
+
+        <div>
+            Input budget:
+            <input type="number" [(ngModel)]="userBudget" placeholder="Your budget">
+        </div>
+
+    </div>
+
+    <div *ngIf="currentGame">
+        Your budget: <span>{{currentGame.currentBudget}}</span>
+    </div>
+
+    <!-- gameplay -->
+    <div style="border: 4px solid green;" *ngIf="currentGame">
+        <div *ngIf="currentGame.currentBudget > 10; else gameOver">
+            <select [(ngModel)]="currentBetAmount">
+                <option [ngValue]="betAm" [disabled]="betAm > currentGame.currentBudget"
+                    *ngFor="let betAm of betAmounts">{{betAm}}</option>
+            </select>
+            <div>
+                Current bet amount: {{currentBetAmount}}
+            </div>
+        </div>
+        <ng-template #gameOver>
+            <div>
+                Game over - no more funds
+            </div>
+        </ng-template>
+
+        <div *ngIf="currentTurn">
+            <div>
+                {{currentTurn.symbol1}}
+            </div>
+            <div>
+                {{currentTurn.symbol2}}
+            </div>
+            <div>
+                {{currentTurn.symbol3}}
+            </div>
+
+            <div>
+                <div *ngIf="winningCombination; else loss">
+                    You won. Ratio: {{winningCombination.ratio}}
+                </div>
+                <ng-template #loss>
+                    You lost
+                </ng-template>
+            </div>
+        </div>
+
+        <div>
+            <button (click)="takeTurn()">Take turn</button>
+        </div>
+    </div>
+    <!-- ./gameplay -->
+
+    <div *ngIf="currentGame" style="border: 1px solid black;">
+        <div style="text-align: center;">
+            <h3>Current game stats</h3>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Date played</th>
+                    <th scope="col">Amount bet</th>
+                    <th scope="col">Symbols</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Ratio</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let turn of currentGame.turns">
+                    <td>
+                        {{turn.creationDate | date: 'yyyy-MM-dd HH:mm:ss'}}
+                    </td>
+                    <td>
+                        {{turn.amountBet}}
+                    </td>
+                    <td>
+                        {{turn.symbol1}}
+                        {{turn.symbol2}}
+                        {{turn.symbol3}}
+                    </td>
+                    <td>
+                        <span *ngIf="getWinningCombination([turn.symbol1, turn.symbol2, turn.symbol3]); else lostSpan">
+                            WON
+                        </span>
+                        <ng-template #lostSpan>
+                            <span>LOST</span>
+                        </ng-template>
+                    </td>
+                    <td>
+                        <span *ngIf="getWinningCombination([turn.symbol1, turn.symbol2, turn.symbol3]); else lostSpan">
+                            {{getWinningCombination([turn.symbol1, turn.symbol2, turn.symbol3]).ratio}}
+                        </span>
+                        <ng-template #lostSpan>
+                            <span>0.0</span>
+                        </ng-template>
+                    </td>
+                    <td>
+                        <span style="color: green;"
+                            *ngIf="getWinningCombination([turn.symbol1, turn.symbol2, turn.symbol3]); else lostSpanTotal">
+                            +{{getWinningCombination([turn.symbol1, turn.symbol2, turn.symbol3]).ratio *
+                            turn.amountBet}}
+                        </span>
+                        <ng-template #lostSpanTotal>
+                            <span style="color: red;">-{{turn.amountBet}}</span>
+                        </ng-template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
